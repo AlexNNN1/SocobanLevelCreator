@@ -6,9 +6,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import org.model.LevelDestination;
-import org.model.LevelPrinter;
-import org.model.LevelS;
 
 public class Main {
 
@@ -24,7 +21,7 @@ public class Main {
 			System.out.println(list.getLevels().size());
 			
 			LevelSourceParcer parcer = new LevelSourceParcer();
-			LevelDestinationList result = parcer.parce(list);
+			/*LevelDestinationList result = */parcer.parce(list);
 		//	LevelPrinter printer = new LevelPrinter();
 			
 			/*for (LevelDestination item : result.) {
