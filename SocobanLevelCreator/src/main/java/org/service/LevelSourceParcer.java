@@ -45,7 +45,6 @@ public class LevelSourceParcer {
 		checkBottomLine(empties, array);
 		
 		checkLeftCol(empties, array);
-		//checkRightCol(empties, array);
 		
 		markEmpties(empties);
 	}
@@ -79,14 +78,6 @@ public class LevelSourceParcer {
 				checkElementForEmpties(empties, item, array, 1, 1);
 		}
 	}
-	
-	//private void checkRightCol(Set<ArrayElement> empties, ArrayElement[][] array) {
-	/*	for (int i = 0; i < array.length; i++) {
-			ArrayElement item = array[i][array.length -1]; 
-			if (item != null && item.getType() == ElementType.Unknown)
-				checkElementForEmpties(empties, item, array, -1, 1);
-		}*/
-	//}
 
 	private void checkElementForEmpties(Set<ArrayElement> empties,
 			ArrayElement item, ArrayElement[][] array, int indentX, int indentY) {
