@@ -11,8 +11,10 @@ public class LevelSourceParcer {
 	public LevelDestinationList parce(SourceLevelsList source) {
 		LevelDestinationList result = new LevelDestinationList();
 		for (LevelS ls : source.getLevels()) {
-			ArrayElement[][] elements = new ArrayElement[ls.getHeight()][ls.getWidth()];
-			for (int i = 0; i < ls.getRows().size(); i++) {  // i = это Y или rows
+			ArrayElement[][] elements = new ArrayElement[ls.getHeight()][ls
+					.getWidth()];
+			for (int i = 0; i < ls.getRows().size(); i++) { // i = это Y или
+															// rows
 				String row = ls.getRows().get(i);
 				for (int j = 0; j < row.length(); j++) { // j это х или cols
 					elements[i][j] = new ArrayElement();
@@ -22,10 +24,18 @@ public class LevelSourceParcer {
 					String value = Character.toString(row.charAt(j));
 					if (value.equals("#")) {
 						elements[i][j].setType(ElementType.Wall);
-					} else if (value.equals(" ") || value.equals(".") ||
-							value.equals("@") || value.equals("$")) {
+					} else if (value.equals(" ")  /* || value.equals("@")|| value.equals("$") || value.equals(".")*/) 
 						elements[i][j].setType(ElementType.Unknown);
-					}
+					else if (value.equals("$"))
+						elements[i][j].setType(ElementType.Box);
+					else if (value.equals("."))
+						elements[i][j].setType(ElementType.Dock);
+					else if (value.equals("*"))
+						elements[i][j].setType(ElementType.BoxOnDock);
+					else if (value.equals("@"))
+						elements[i][j].setType(ElementType.Worker);
+					else if (value.equals("+"))
+						elements[i][j].setType(ElementType.WorkerOnDock);
 				}
 			}
 			markNullsAsUnknow(elements);
@@ -172,21 +182,32 @@ public class LevelSourceParcer {
 		for (int i = 0; i < array.length; i++) {
 			for (int j = 0; j < array[i].length; j++) {
 				ArrayElement item = array[i][j];
-				if (item == null) 
+				if (item == null)
 					System.out.print("~");
-				 else if (item.getType() == ElementType.Wall) 
+				else if (item.getType() == ElementType.Wall)
 					System.out.print("W");
-				 else if (item.getType() == ElementType.Tile) 
-					System.out.print("_");
-				 else if (item.getType() == ElementType.Empty) 
-						System.out.print("E");
-				 else if (item.getType() == ElementType.Border) 
-						System.out.print("B");
-				 else if (item.getType() == ElementType.Unknown) 
-						System.out.print(".");
-				 else if (item.getType() == ElementType.Marked) 
-						System.out.print("I");
+				else if (item.getType() == ElementType.Tile)
+					System.out.print(" ");
+				else if (item.getType() == ElementType.Empty)
+					System.out.print("E");
+				else if (item.getType() == ElementType.Border)
+					System.out.print("B");
+				else if (item.getType() == ElementType.Unknown)
+					System.out.print(".");
+				else if (item.getType() == ElementType.Marked)
+					System.out.print(" ");
+				else if (item.getType() == ElementType.Worker)
+					System.out.print("R");
+				else if (item.getType() == ElementType.WorkerOnDock)
+					System.out.print("U");
+				else if (item.getType() == ElementType.Box)
+					System.out.print("O");
+				else if (item.getType() == ElementType.BoxOnDock)
+					System.out.print("Q");
+				else if (item.getType() == ElementType.Dock)
+					System.out.print("D");
 				
+
 			}
 			System.out.println("");
 		}
