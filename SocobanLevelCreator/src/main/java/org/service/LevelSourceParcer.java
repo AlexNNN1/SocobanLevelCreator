@@ -7,157 +7,161 @@ import org.model.ElementType;
 import org.model.LevelS;
 
 public class LevelSourceParcer {
+	
+	private ArrayElement[][] tempElements;
+	Set<ArrayElement> empties = new HashSet<ArrayElement>();
 
 	public LevelDestinationList parce(SourceLevelsList source) {
 		LevelDestinationList result = new LevelDestinationList();
 		for (LevelS ls : source.getLevels()) {
-			ArrayElement[][] elements = new ArrayElement[ls.getHeight()][ls
-					.getWidth()];
-			for (int i = 0; i < ls.getRows().size(); i++) { // i = это Y или
-															// rows
-				String row = ls.getRows().get(i);
-				for (int j = 0; j < row.length(); j++) { // j это х или cols
-					elements[i][j] = new ArrayElement();
-					elements[i][j].setType(ElementType.Empty);
-					elements[i][j].setX(j);
-					elements[i][j].setY(i);
-					String value = Character.toString(row.charAt(j));
-					if (value.equals("#")) {
-						elements[i][j].setType(ElementType.Wall);
-					} else if (value.equals(" ")  /* || value.equals("@")|| value.equals("$") || value.equals(".")*/) 
-						elements[i][j].setType(ElementType.Unknown);
-					else if (value.equals("$"))
-						elements[i][j].setType(ElementType.Box);
-					else if (value.equals("."))
-						elements[i][j].setType(ElementType.Dock);
-					else if (value.equals("*"))
-						elements[i][j].setType(ElementType.BoxOnDock);
-					else if (value.equals("@"))
-						elements[i][j].setType(ElementType.Worker);
-					else if (value.equals("+"))
-						elements[i][j].setType(ElementType.WorkerOnDock);
-				}
-			}
-			markNullsAsUnknow(elements);
-			clearBorders(elements);
-			setBorders(elements);
-			displaySchematicArray(elements);
+			createEmptyArray(ls);
+			parceLevelClassicSchema(ls);
+			postProcessingArray();
 		}
-
 		return result;
 	}
 	
-	private void clearBorders(ArrayElement[][] array) {
-		Set<ArrayElement> empties = new HashSet<ArrayElement>();
-		checkTopLine(empties, array);
-		checkBottomLine(empties, array);
-		
-		checkLeftCol(empties, array);
-		checkRightCol(empties, array);
-		markEmpties(empties);
+	private void postProcessingArray() {
+		markNullsAsUnknow();
+		clearBorders();
+		setBorders();
+		displaySchematicArray();
+	}
+	
+	private void parceLevelClassicSchema(LevelS ls) {
+		for (int i = 0; i < ls.getRows().size(); i++) { // i = это Y или rows
+			String row = ls.getRows().get(i);
+			for (int j = 0; j < row.length(); j++) { // j это х или cols
+				String value = Character.toString(row.charAt(j));
+				if (value.equals("#")) 
+					tempElements[i][j].setType(ElementType.Wall);
+				 else if (value.equals(" "))
+					 tempElements[i][j].setType(ElementType.Unknown);
+				else if (value.equals("$"))
+					tempElements[i][j].setType(ElementType.Box);
+				else if (value.equals("."))
+					tempElements[i][j].setType(ElementType.Dock);
+				else if (value.equals("*"))
+					tempElements[i][j].setType(ElementType.BoxOnDock);
+				else if (value.equals("@"))
+					tempElements[i][j].setType(ElementType.Worker);
+				else if (value.equals("+"))
+					tempElements[i][j].setType(ElementType.WorkerOnDock);
+			}
+		}
+	}
+	
+	private void createEmptyArray(LevelS ls) {
+		tempElements = new ArrayElement[ls.getHeight()][ls.getWidth()];
+		for (int i = 0; i < tempElements.length; i++)
+			for (int j = 0; j < tempElements[i].length; j++) {
+				tempElements[i][j] = new ArrayElement();
+				tempElements[i][j].setType(ElementType.Unknown);
+				tempElements[i][j].setX(j);
+				tempElements[i][j].setY(i);
+			}
+	}
+	
+	private void clearBorders() {
+		empties.clear();
+		checkTopLine();
+		checkBottomLine();
+		checkLeftCol();
+		checkRightCol();
+		markEmpties();
 		
 	}
 	
-	private void markNullsAsUnknow(ArrayElement[][] array) {
-		for (int i = 0; i < array.length; i++)
-			for (int j = 0; j < array[i].length; j++) {
-				if (array[i][j] == null) {
-					array[i][j] = new ArrayElement();
-					array[i][j].setType(ElementType.Unknown);
-					array[i][j].setX(j);
-					array[i][j].setY(i);
+	private void markNullsAsUnknow() {
+		for (int i = 0; i < tempElements.length; i++)
+			for (int j = 0; j < tempElements[i].length; j++) {
+				if (tempElements[i][j] == null) {
+					tempElements[i][j] = new ArrayElement();
+					tempElements[i][j].setType(ElementType.Unknown);
+					tempElements[i][j].setX(j);
+					tempElements[i][j].setY(i);
 				}
 			}
 	}
 
-	private void markEmpties(Set<ArrayElement> empties) {
+	private void markEmpties() {
 		for (ArrayElement item : empties) {
 			item.setType(ElementType.Marked);
 		}
 	}
 
-	private void checkTopLine(Set<ArrayElement> empties, ArrayElement[][] array) {
-		for (int i = 0; i < array[0].length; i++) {
-			ArrayElement item = array[0][i]; 
+	private void checkTopLine() {
+		for (int i = 0; i < tempElements[0].length; i++) {
+			ArrayElement item = tempElements[0][i]; 
 			if (item != null && item.getType() == ElementType.Unknown)
-				checkElementForEmpties(empties, item, array, 1, 1);
+				checkElementForEmpties(item);
 		}
 	}
 	
-	private void checkBottomLine(Set<ArrayElement> empties, ArrayElement[][] array) {
-		for (int i = 0; i < array[0].length; i++) {
-			ArrayElement item = array[array.length - 1][i]; 
+	private void checkBottomLine() {
+		for (int i = 0; i < tempElements[0].length; i++) {
+			ArrayElement item = tempElements[tempElements.length - 1][i]; 
 			if (item != null && item.getType() == ElementType.Unknown)
-				checkElementForEmpties(empties, item, array, 1, -1);
+				checkElementForEmpties(item);
 		}
 	}
 	
-	private void checkLeftCol(Set<ArrayElement> empties, ArrayElement[][] array) {
-		for (int i = 0; i < array.length; i++) {
-			ArrayElement item = array[i][0]; 
+	private void checkLeftCol() {
+		for (int i = 0; i < tempElements.length; i++) {
+			ArrayElement item = tempElements[i][0]; 
 			if (item != null && item.getType() == ElementType.Unknown)
-				checkElementForEmpties(empties, item, array, 1, 1);
+				checkElementForEmpties(item);
 		}
 	}
 	
-	private void checkRightCol(Set<ArrayElement> empties, ArrayElement[][] array) {
-		for (int i = 0; i < array.length; i++) {
-			ArrayElement item = array[i][array[0].length - 1]; 
+	private void checkRightCol() {
+		for (int i = 0; i < tempElements.length; i++) {
+			ArrayElement item = tempElements[i][tempElements[0].length - 1]; 
 			if (item != null && item.getType() == ElementType.Unknown)
-				checkElementForEmpties(empties, item, array, -1, 1);
+				checkElementForEmpties(item);
 		}
 	}
 
-	private void checkElementForEmpties(Set<ArrayElement> empties,
-			ArrayElement item, ArrayElement[][] array, int indentX, int indentY) {
+	private void checkElementForEmpties(ArrayElement item) {
 		if (!empties.contains(item)) {
 			empties.add(item);
-			// ArrayElement nearX, ArrayElement nearY,
-			ArrayElement nearXleft = getNearItem(item.getX() - 1, item.getY(), array);
-			ArrayElement nearYtop = getNearItem(item.getX(), item.getY() - 1, array);
-			ArrayElement nearXright = getNearItem(item.getX() + 1, item.getY(), array);
-			ArrayElement nearYbottom = getNearItem(item.getX(), item.getY() + 1, array);
-			if (nearXleft != null && nearXleft.getType() == ElementType.Unknown)
-				checkElementForEmpties(empties, nearXleft, array, indentX, indentY);
-			if (nearYtop != null && nearYtop.getType() == ElementType.Unknown)
-				checkElementForEmpties(empties, nearYtop, array, indentX,indentY);
-			if (nearXright != null	&& nearXright.getType() == ElementType.Unknown)
-				checkElementForEmpties(empties, nearXright, array, indentX, indentY);
-			if (nearYbottom != null && nearYbottom.getType() == ElementType.Unknown)
-				checkElementForEmpties(empties, nearYbottom, array, indentX, indentY);
+			ArrayElement left = getNearItem(item.getX() - 1, item.getY());
+			ArrayElement top = getNearItem(item.getX(), item.getY() - 1);
+			ArrayElement right = getNearItem(item.getX() + 1, item.getY());
+			ArrayElement bottom = getNearItem(item.getX(), item.getY() + 1);
+			if (left != null && left.getType() == ElementType.Unknown)
+				checkElementForEmpties(left);
+			if (top != null && top.getType() == ElementType.Unknown)
+				checkElementForEmpties(top);
+			if (right != null && right.getType() == ElementType.Unknown)
+				checkElementForEmpties(right);
+			if (bottom != null && bottom.getType() == ElementType.Unknown)
+				checkElementForEmpties(bottom);
 		}
 	}
 
-	private ArrayElement getNearItem(int indentX, int indentY, ArrayElement[][] array) {
+	private ArrayElement getNearItem(int indentX, int indentY) {
 		ArrayElement result = null;
-		if (indentY < array.length && indentX < array[0].length && indentY >= 0 && indentX >= 0)
-			result = array[indentY][indentX];
+		if (indentY < tempElements.length && indentX <
+				tempElements[0].length && indentY >= 0 && indentX >= 0)
+			result = tempElements[indentY][indentX];
 		return result;
 	}
 	
-	private void setBorders(ArrayElement[][] array) {
-		for (int i = 0; i < array.length; i++)
-			for (int j = 0; j < array[i].length; j++) {
-				ArrayElement item = array[i][j];
+	private void setBorders() {
+		for (int i = 0; i < tempElements.length; i++)
+			for (int j = 0; j < tempElements[i].length; j++) {
+				ArrayElement item = tempElements[i][j];
 				if (item.getType() == ElementType.Wall) {
-					ArrayElement left = getNearItem(item.getX() - 1,
-							item.getY(), array);
-					ArrayElement right = getNearItem(item.getX() + 1,
-							item.getY(), array);
-					ArrayElement top = getNearItem(item.getX(),
-							item.getY() - 1, array);
-					ArrayElement bottom = getNearItem(item.getX(),
-							item.getY() + 1, array);
+					ArrayElement left = getNearItem(item.getX() - 1, item.getY());
+					ArrayElement right = getNearItem(item.getX() + 1, item.getY());
+					ArrayElement top = getNearItem(item.getX(), item.getY() - 1);
+					ArrayElement bottom = getNearItem(item.getX(), item.getY() + 1);
 					
-					
-					ArrayElement topleft = getNearItem(item.getX() - 1,
-							item.getY() - 1, array);
-					ArrayElement topright = getNearItem(item.getX() + 1,
-							item.getY() - 1, array);
-					ArrayElement bottomleft = getNearItem(item.getX() - 1,
-							item.getY() + 1, array);
-					ArrayElement bottomRight = getNearItem(item.getX() + 1,
-							item.getY() + 1, array);
+					ArrayElement topleft = getNearItem(item.getX() - 1, item.getY() - 1);
+					ArrayElement topright = getNearItem(item.getX() + 1, item.getY() - 1);
+					ArrayElement bottomleft = getNearItem(item.getX() - 1, item.getY() + 1);
+					ArrayElement bottomRight = getNearItem(item.getX() + 1,	item.getY() + 1);
 					
 					if (isItemEmpty(left) || isItemEmpty(right) ||
 							isItemEmpty(top) || isItemEmpty(bottom) ||
@@ -178,10 +182,10 @@ public class LevelSourceParcer {
 		return result;
 	}
 	
-	private void displaySchematicArray(ArrayElement[][] array) {
-		for (int i = 0; i < array.length; i++) {
-			for (int j = 0; j < array[i].length; j++) {
-				ArrayElement item = array[i][j];
+	private void displaySchematicArray() {
+		for (int i = 0; i < tempElements.length; i++) {
+			for (int j = 0; j < tempElements[i].length; j++) {
+				ArrayElement item = tempElements[i][j];
 				if (item == null)
 					System.out.print("~");
 				else if (item.getType() == ElementType.Wall)
@@ -206,13 +210,11 @@ public class LevelSourceParcer {
 					System.out.print("Q");
 				else if (item.getType() == ElementType.Dock)
 					System.out.print("D");
-				
-
 			}
 			System.out.println("");
 		}
 		System.out.println("");
 		System.out.println("");
 	}
-
+	
 }
