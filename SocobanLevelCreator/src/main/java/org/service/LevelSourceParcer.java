@@ -1,11 +1,7 @@
 package org.service;
 
-
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-
 import org.model.ArrayElement;
 import org.model.ElementType;
 import org.model.LevelS;
@@ -32,7 +28,9 @@ public class LevelSourceParcer {
 					}
 				}
 			}
+			markNullsAsUnknow(elements);
 			clearBorders(elements);
+			setBorders(elements);
 			displaySchematicArray(elements);
 		}
 
@@ -45,10 +43,23 @@ public class LevelSourceParcer {
 		checkBottomLine(empties, array);
 		
 		checkLeftCol(empties, array);
-		
+		checkRightCol(empties, array);
 		markEmpties(empties);
+		
 	}
 	
+	private void markNullsAsUnknow(ArrayElement[][] array) {
+		for (int i = 0; i < array.length; i++)
+			for (int j = 0; j < array[i].length; j++) {
+				if (array[i][j] == null) {
+					array[i][j] = new ArrayElement();
+					array[i][j].setType(ElementType.Unknown);
+					array[i][j].setX(j);
+					array[i][j].setY(i);
+				}
+			}
+	}
+
 	private void markEmpties(Set<ArrayElement> empties) {
 		for (ArrayElement item : empties) {
 			item.setType(ElementType.Marked);
@@ -78,25 +89,82 @@ public class LevelSourceParcer {
 				checkElementForEmpties(empties, item, array, 1, 1);
 		}
 	}
+	
+	private void checkRightCol(Set<ArrayElement> empties, ArrayElement[][] array) {
+		for (int i = 0; i < array.length; i++) {
+			ArrayElement item = array[i][array[0].length - 1]; 
+			if (item != null && item.getType() == ElementType.Unknown)
+				checkElementForEmpties(empties, item, array, -1, 1);
+		}
+	}
 
 	private void checkElementForEmpties(Set<ArrayElement> empties,
 			ArrayElement item, ArrayElement[][] array, int indentX, int indentY) {
-			if (!empties.contains(item)) {
-				empties.add(item);
-				//ArrayElement nearX, ArrayElement nearY, 
-				ArrayElement nearX = getNearItem(item.getX() + indentX, item.getY(), array);
-				ArrayElement nearY = getNearItem(item.getX(), item.getY()  + indentY, array);	
-				if (nearX != null && nearX.getType() == ElementType.Unknown) 
-					checkElementForEmpties(empties, nearX, array, indentX, indentY);
-				if (nearY != null && nearY.getType() == ElementType.Unknown) 
-					checkElementForEmpties(empties, nearY, array, indentX, indentY);
-			}
+		if (!empties.contains(item)) {
+			empties.add(item);
+			// ArrayElement nearX, ArrayElement nearY,
+			ArrayElement nearXleft = getNearItem(item.getX() - 1, item.getY(), array);
+			ArrayElement nearYtop = getNearItem(item.getX(), item.getY() - 1, array);
+			ArrayElement nearXright = getNearItem(item.getX() + 1, item.getY(), array);
+			ArrayElement nearYbottom = getNearItem(item.getX(), item.getY() + 1, array);
+			if (nearXleft != null && nearXleft.getType() == ElementType.Unknown)
+				checkElementForEmpties(empties, nearXleft, array, indentX, indentY);
+			if (nearYtop != null && nearYtop.getType() == ElementType.Unknown)
+				checkElementForEmpties(empties, nearYtop, array, indentX,indentY);
+			if (nearXright != null	&& nearXright.getType() == ElementType.Unknown)
+				checkElementForEmpties(empties, nearXright, array, indentX, indentY);
+			if (nearYbottom != null && nearYbottom.getType() == ElementType.Unknown)
+				checkElementForEmpties(empties, nearYbottom, array, indentX, indentY);
+		}
 	}
 
 	private ArrayElement getNearItem(int indentX, int indentY, ArrayElement[][] array) {
 		ArrayElement result = null;
-		if (indentY < array.length && indentX < array[0].length)
+		if (indentY < array.length && indentX < array[0].length && indentY >= 0 && indentX >= 0)
 			result = array[indentY][indentX];
+		return result;
+	}
+	
+	private void setBorders(ArrayElement[][] array) {
+		for (int i = 0; i < array.length; i++)
+			for (int j = 0; j < array[i].length; j++) {
+				ArrayElement item = array[i][j];
+				if (item.getType() == ElementType.Wall) {
+					ArrayElement left = getNearItem(item.getX() - 1,
+							item.getY(), array);
+					ArrayElement right = getNearItem(item.getX() + 1,
+							item.getY(), array);
+					ArrayElement top = getNearItem(item.getX(),
+							item.getY() - 1, array);
+					ArrayElement bottom = getNearItem(item.getX(),
+							item.getY() + 1, array);
+					
+					
+					ArrayElement topleft = getNearItem(item.getX() - 1,
+							item.getY() - 1, array);
+					ArrayElement topright = getNearItem(item.getX() + 1,
+							item.getY() - 1, array);
+					ArrayElement bottomleft = getNearItem(item.getX() - 1,
+							item.getY() + 1, array);
+					ArrayElement bottomRight = getNearItem(item.getX() + 1,
+							item.getY() + 1, array);
+					
+					if (isItemEmpty(left) || isItemEmpty(right) ||
+							isItemEmpty(top) || isItemEmpty(bottom) ||
+							isItemEmpty(topleft) || isItemEmpty(topright) ||
+							isItemEmpty(bottomleft) || isItemEmpty(bottomRight)) 
+						item.setType(ElementType.Border);
+				}
+			}
+	}
+	
+	private Boolean isItemEmpty(ArrayElement item) {
+		Boolean result = false;
+		if (item != null) {
+			if (item.getType() == ElementType.Marked)
+				result = true;
+		} else
+			result = true;
 		return result;
 	}
 	
