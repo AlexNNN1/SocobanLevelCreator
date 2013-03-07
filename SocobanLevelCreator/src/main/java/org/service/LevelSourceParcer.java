@@ -1,23 +1,33 @@
 package org.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.model.ArrayElement;
 import org.model.ElementType;
 import org.model.LevelS;
+import org.model.TemporalyArray;
 
 public class LevelSourceParcer {
 	
 	private ArrayElement[][] tempElements;
+	private List<TemporalyArray> resultList = new ArrayList<TemporalyArray>();
 	Set<ArrayElement> empties = new HashSet<ArrayElement>();
 
 	public LevelDestinationList parce(SourceLevelsList source) {
+		resultList.clear();
 		LevelDestinationList result = new LevelDestinationList();
 		for (LevelS ls : source.getLevels()) {
-			createEmptyArray(ls);
+			TemporalyArray tmp = new TemporalyArray();
+			createEmptyArray(ls, tmp);
 			parceLevelClassicSchema(ls);
 			postProcessingArray();
+			resultList.add(tmp);
 		}
+		displaySchematicArray();
 		return result;
 	}
 	
@@ -26,7 +36,6 @@ public class LevelSourceParcer {
 		clearBorders();
 		setBorders();
 		convertUnknownsToTiles();
-		displaySchematicArray();
 	}
 	
 	private void parceLevelClassicSchema(LevelS ls) {
@@ -52,8 +61,9 @@ public class LevelSourceParcer {
 		}
 	}
 	
-	private void createEmptyArray(LevelS ls) {
+	private void createEmptyArray(LevelS ls, TemporalyArray tmp) {
 		tempElements = new ArrayElement[ls.getHeight()][ls.getWidth()];
+		tmp.setItem(tempElements);
 		for (int i = 0; i < tempElements.length; i++)
 			for (int j = 0; j < tempElements[i].length; j++) {
 				tempElements[i][j] = new ArrayElement();
@@ -191,38 +201,44 @@ public class LevelSourceParcer {
 	}
 	
 	private void displaySchematicArray() {
-		for (int i = 0; i < tempElements.length; i++) {
-			for (int j = 0; j < tempElements[i].length; j++) {
-				ArrayElement item = tempElements[i][j];
-				if (item == null)
-					System.out.print("~");
-				else if (item.getType() == ElementType.Wall)
-					System.out.print("W");
-				else if (item.getType() == ElementType.Tile)
-					System.out.print(" ");
-				else if (item.getType() == ElementType.Empty)
-					System.out.print("E");
-				else if (item.getType() == ElementType.Border)
-					System.out.print("B");
-				else if (item.getType() == ElementType.Unknown)
-					System.out.print(".");
-				else if (item.getType() == ElementType.Marked)
-					System.out.print(" ");
-				else if (item.getType() == ElementType.Worker)
-					System.out.print("R");
-				else if (item.getType() == ElementType.WorkerOnDock)
-					System.out.print("U");
-				else if (item.getType() == ElementType.Box)
-					System.out.print("O");
-				else if (item.getType() == ElementType.BoxOnDock)
-					System.out.print("Q");
-				else if (item.getType() == ElementType.Dock)
-					System.out.print("D");
+		Collections.sort(resultList);
+		for (TemporalyArray tmp : resultList) {
+			
+			for (int i = 0; i < tmp.getItem().length; i++) {
+				for (int j = 0; j < tmp.getItem()[i].length; j++) {
+					ArrayElement item = tmp.getItem()[i][j];
+					if (item == null)
+						System.out.print("~");
+					else if (item.getType() == ElementType.Wall)
+						System.out.print("W");
+					else if (item.getType() == ElementType.Tile)
+						System.out.print(" ");
+					else if (item.getType() == ElementType.Empty)
+						System.out.print("E");
+					else if (item.getType() == ElementType.Border)
+						System.out.print("B");
+					else if (item.getType() == ElementType.Unknown)
+						System.out.print(".");
+					else if (item.getType() == ElementType.Marked)
+						System.out.print(" ");
+					else if (item.getType() == ElementType.Worker)
+						System.out.print("R");
+					else if (item.getType() == ElementType.WorkerOnDock)
+						System.out.print("U");
+					else if (item.getType() == ElementType.Box)
+						System.out.print("O");
+					else if (item.getType() == ElementType.BoxOnDock)
+						System.out.print("Q");
+					else if (item.getType() == ElementType.Dock)
+						System.out.print("D");
+				}
+				System.out.println("");
 			}
 			System.out.println("");
+			System.out.println("");
+			
 		}
-		System.out.println("");
-		System.out.println("");
+		
 	}
 	
 }
