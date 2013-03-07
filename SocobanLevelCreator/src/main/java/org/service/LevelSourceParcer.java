@@ -25,6 +25,7 @@ public class LevelSourceParcer {
 		markNullsAsUnknow();
 		clearBorders();
 		setBorders();
+		convertUnknownsToTiles();
 		displaySchematicArray();
 	}
 	
@@ -69,7 +70,6 @@ public class LevelSourceParcer {
 		checkLeftCol();
 		checkRightCol();
 		markEmpties();
-		
 	}
 	
 	private void markNullsAsUnknow() {
@@ -88,6 +88,14 @@ public class LevelSourceParcer {
 		for (ArrayElement item : empties) {
 			item.setType(ElementType.Marked);
 		}
+	}
+	
+	private void convertUnknownsToTiles() {
+		for (int i = 0; i < tempElements.length; i++)
+			for (int j = 0; j < tempElements[i].length; j++) {
+				if (tempElements[i][j].getType() == ElementType.Unknown)
+					tempElements[i][j].setType(ElementType.Tile);
+			}
 	}
 
 	private void checkTopLine() {
