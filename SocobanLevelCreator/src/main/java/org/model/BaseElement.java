@@ -1,15 +1,13 @@
 package org.model;
 
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name="item")
+//@XmlRootElement(name="item")
 public class BaseElement {
 	
 	private int id;
 	private int col;
 	private int row;
-
 	
 	@XmlAttribute(name="id")
 	public int getId() {
@@ -19,7 +17,7 @@ public class BaseElement {
 		this.id = id;
 	}
 	
-	@XmlAttribute(name="col")
+	@XmlAttribute(name="x")
 	public int getCol() {
 		return col;
 	}
@@ -27,11 +25,11 @@ public class BaseElement {
 		this.col = col;
 	}
 	
-	@XmlAttribute(name="row")
+	@XmlAttribute(name="y")
 	public int getRow() {
 		return row;
 	}
 	public void setRow(int row) {
 		this.row = row;
-	}	
+	}
 }

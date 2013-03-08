@@ -37,7 +37,7 @@ public class Main {
 		JAXBContext context = JAXBContext
 				.newInstance(LevelDestinationList.class);
 		Marshaller marshaller = context.createMarshaller();
-	//  marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+	    marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 		marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8"); 
 		marshaller.marshal(source, new FileOutputStream("d:\\results.xml"));
 	}
