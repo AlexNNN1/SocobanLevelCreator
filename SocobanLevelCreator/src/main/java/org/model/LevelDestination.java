@@ -10,7 +10,7 @@ public class LevelDestination {
 	
 	private List<BaseElement> borders = new ArrayList<BaseElement>();
 	
-	@XmlElement(name="items")
+	@XmlElement(name="borders")
 	public List<BaseElement> getBorders() {
 		return borders;
 	}

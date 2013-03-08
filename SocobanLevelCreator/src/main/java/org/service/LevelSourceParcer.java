@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.model.ArrayElement;
@@ -19,7 +20,6 @@ public class LevelSourceParcer {
 
 	public LevelDestinationList parce(SourceLevelsList source) {
 		resultList.clear();
-		LevelDestinationList result = new LevelDestinationList();
 		for (LevelS ls : source.getLevels()) {
 			TemporalyArray tmp = new TemporalyArray();
 			createEmptyArray(ls, tmp);
@@ -27,8 +27,9 @@ public class LevelSourceParcer {
 			postProcessingArray();
 			resultList.add(tmp);
 		}
+		deleteBigLevels();
 		displaySchematicArray();
-		return result;
+		return new LevelBuilder().build(resultList);
 	}
 	
 	private void postProcessingArray() {
@@ -200,6 +201,18 @@ public class LevelSourceParcer {
 		return result;
 	}
 	
+	private void deleteBigLevels() {
+		for (Iterator<TemporalyArray> iterator = resultList.iterator(); iterator.hasNext();) {
+			TemporalyArray element = iterator.next();
+			if (element.getHeight() > 20 || element.getWidth() > 20)
+				iterator.remove();
+			}
+		}
+		/*for (TemporalyArray element : resultList) {
+			if (element.getHeight() > 20 || element.getWidth() > 20)
+				resultList.remove(element);
+			}*/
+	
 	private void displaySchematicArray() {
 		Collections.sort(resultList);
 		for (TemporalyArray tmp : resultList) {
@@ -238,7 +251,8 @@ public class LevelSourceParcer {
 			System.out.println("");
 			
 		}
-		
 	}
+	
+	
 	
 }
